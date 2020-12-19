@@ -685,6 +685,7 @@ trait EpaWysiwygTextProcessingTrait {
         }
 
         // Wrap label and input in a new div.
+        $div = null;
         if ($label && $input) {
           $div = $doc->createElement('div');
           $div->setAttribute('class', 'form-item form-item--email is-inline');
