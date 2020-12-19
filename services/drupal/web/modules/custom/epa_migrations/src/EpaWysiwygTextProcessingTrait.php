@@ -725,9 +725,10 @@ trait EpaWysiwygTextProcessingTrait {
         $quote = $element->firstChild->nodeValue;
 
         // Extract the citation.
-        $citation_element = $xpath->query('span[contains(concat(" ", @class, " " ), " author ")]');
-        if ($citation_element) {
-          $citation = str_replace('—', '', $citation_element->firstChild->nodeValue);
+        $citation = '';
+        $citation_elements = $xpath->query('span[contains(concat(" ", @class, " " ), " author ")]');
+        if ($citation_elements && $citation_elements->length) {
+          $citation = str_replace('—', '', $citation_elements->item(0)->firstChild->nodeValue);
         }
 
         // Build the new element.
