@@ -460,7 +460,7 @@ trait EpaWysiwygTextProcessingTrait {
             // Remove old classes, id, and any 'display: none' styles.
             $div->setAttribute('class', self::classReplace(['accordion-pane', 'is-closed'], ['', ''], $div->attributes->getNamedItem('class')->value));
             $div->removeAttribute('id');
-            $div->setAttribute('style', str_replace('style="display: none;"', '', $div->attributes->getNamedItem('style')->array_count_values));
+            $div->setAttribute('style', preg_replace('~(^|;)\s*display:\s*none\s*(;|$)~', ';', $div->getAttribute('class')));
           }
         }
       }
