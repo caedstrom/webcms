@@ -846,7 +846,7 @@ trait EpaWysiwygTextProcessingTrait {
     }
 
     // If the original element is an only child, traverse the ancestors.
-    while ($only_child && $element->name !== 'tempwrapper') {
+    while ($only_child && $element->nodeName !== 'tempwrapper') {
       $cleaned_parent = $this->removeEmptyTextNodes($element_to_remove->parentNode);
 
       if (count($cleaned_parent->childNodes) == 1 && $cleaned_parent->childNodes[0]->isSameNode($element_to_remove)) {
