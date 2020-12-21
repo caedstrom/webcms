@@ -148,6 +148,17 @@ services:
         source: es-data
         target: /usr/share/elasticsearch/data
 
+
+  blackfire:
+    image: blackfire/blackfire
+    ports: ["8707"]
+    environment:
+      # Exposes BLACKFIRE_SERVER_* environment variables from the host
+      BLACKFIRE_SERVER_ID: ~
+      BLACKFIRE_SERVER_TOKEN: ~
+      BLACKFIRE_CLIENT_ID: ~
+      BLACKFIRE_CLIENT_TOKEN: ~
+
 # Persistent storage volumes. Volumes allow for data to survive container shutdown.
 volumes:
   es-data: null
