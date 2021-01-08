@@ -1,9 +1,20 @@
 #!/bin/bash
 
+# Note: First use allow-unprocessed.sh to set allowable unprocessed counts
+# before usage. These are stored in the D8 DB.
+
 set -euo pipefail
 
 # Number of items to process in a single batch run
 batch_size=1000
+
+# https://stackoverflow.com/a/33248547/3779
+trim() {
+  local s2 s="$*"
+  until s2="${s#[[:space:]]}"; [ "$s2" = "$s" ]; do s="$s2"; done
+  until s2="${s%[[:space:]]}"; [ "$s2" = "$s" ]; do s="$s2"; done
+  echo "$s"
+}
 
 # USAGE:
 #   run_migration MIGRATION
@@ -12,27 +23,34 @@ batch_size=1000
 #
 # This function runs a migration to completion, using the configured $batch_size variable
 # above. If a migration yields unprocessed entities greater than the threshold specified
-# in the expected_unprocessed array, then this function returns a non-zero exit code.
+# by the allow-unprocessed.sh script, then this function returns a non-zero exit code.
 run_migration() {
   local migration
-  local total batches unprocessed
+  local total batches unprocessed remaining
   local start finish time
   local i
+  local halted
 
   # Get the migration name
   migration="$1"
 
-  # Determine the number of entities to process, and divide that by the batch size.
-  total="$(drush ms "$migration" --field=total)"
-  batches=$((total / batch_size))
+  # If already done, skip.
+  unprocessed="$(trim $(drush ms "$migration" --field=unprocessed))"
+  if test "$unprocessed" = 0; then
+    echo "[$migration] Bypassing, 0 remaining"
+    return 0
+  fi
 
-  # Add an extra batch if the total entities isn't a clean multiple of the batch size
+  # Determine the number of entities to process, and divide that by the batch size.
+  batches=$((unprocessed / batch_size))
+
+  # Add an extra batch if the unprocessed entities isn't a clean multiple of the batch size
   # (bash doesn't use floating point, so we can't use a rounding function here).
-  if (((total % batch_size) != 0)); then
+  if (((unprocessed % batch_size) != 0)); then
     ((batches += 1))
   fi
 
-  echo "[$migration] Importing $total entities"
+  echo "[$migration] Importing $unprocessed entities"
   start="$(date +%s)"
 
   # Run the migration
@@ -42,26 +60,39 @@ run_migration() {
       --limit=$batch_size \
       --continue-on-failure \
       "$migration"
+
+    # Check if we've asked to halt. Migration's own status field isn't really reliable
+    # for discerning whether a migration has been stopped or completed.
+    halted="$(trim $(drush state-get epa.migrations_halted))"
+    if test -n "$halted"; then
+      # Output the num remaining and exit
+      remaining="$(trim $(drush ms "$migration" --field=unprocessed))"
+      echo "[$migration] Halted ($remaining unprocessed of $unprocessed)"
+      echo "Halting migration script, deleting halt signal"
+      drush state-del epa.migrations_halted
+      exit 1
+    fi
   done
 
+  # Calculate the difference in seconds for some timing statistics
   finish="$(date +%s)"
+  time=$((finish - start))
 
   # Determine how many unprocessed items were left behind by the migration.
-  unprocessed="$(drush ms "$migration" --field=unprocessed)"
+  remaining="$(trim $(drush ms "$migration" --field=unprocessed))"
+  total="$(trim $(drush ms "$migration" --field=total))"
 
   # If we don't have any special expected count, default to zero.
-  expected="${expected_unprocessed[$migration]:-0}"
+  expected="$(trim $(drush state-get epa.allowed_unprocessed.$migration))"
+  expected="${expected:-0}"
 
   # If the unprocessed count is above the threshold, return a failure.
-  if test "$unprocessed" -gt "$expected"; then
-    echo "[$migration] Encountered $unprocessed unprocessed items; expecting $expected" >&2
+  if test "$remaining" -gt "$expected"; then
+    echo "[$migration] Encountered $remaining unprocessed items; expecting $expected" >&2
     return 1
   fi
 
-  # Calculate the difference in seconds for some timing statistics
-  time=$((finish - start))
-
-  echo "[$migration] Done ($total in ${time}s)"
+  echo "[$migration] Done ($unprocessed in ${time}s in this batch, total $total)"
 }
 
 # Usage:
@@ -207,14 +238,6 @@ latest_revision_migrations=(
 
 path_redirect_migrations=(
   upgrade_d7_path_redirect
-)
-
-# Collection of allowed thresholds for unprocessed items in a migration. The array is
-# keyed by migration name, and the values are the expected unprocessed count. If 0
-# entities are expected to remain unprocessed, then it is safe to omit that migration from
-# this array. See the run_migration function for how this is used.
-declare -A expected_unprocessed=(
-  # (syntax note: the square brackets are required)
 )
 
 # Import taxonomy terms, groups, and users.
