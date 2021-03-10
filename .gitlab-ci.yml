@@ -14,8 +14,8 @@ variables:
   TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/dev
 
   #Run in an automated fashion without console input
-  TF_IN_AUTOMATION=1 
-  TF_INPUT=0 
+  TF_IN_AUTOMATION: 1 
+  TF_INPUT: 0 
   
   TF_VAR_aws_region: "us-east-1"
   
