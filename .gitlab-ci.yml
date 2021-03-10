@@ -56,7 +56,7 @@ before_script:
   - cd ${TF_ROOT}
   - pwd
   - terraform --version
-  - terraform init
+  - terraform init -backend-config=aws_region=${TF_VAR_aws_region}
 
 stages:
   - validate
