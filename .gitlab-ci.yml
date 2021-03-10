@@ -17,7 +17,7 @@ variables:
   TF_IN_AUTOMATION: 1 
   TF_INPUT: 0 
   
-  TF_VAR_aws_region: "us-east-1"
+  aws_region: "us-east-1"
   
   # Module-wide variables
   TF_VAR_environment: "preproduction"
@@ -60,7 +60,7 @@ before_script:
   - cd ${TF_ROOT}
   - pwd
   - terraform --version
-  - terraform init  
+  - terraform init
 
 stages:
   - validate
