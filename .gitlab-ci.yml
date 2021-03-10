@@ -59,8 +59,8 @@ cache:
 before_script:
   - cd ${TF_ROOT}
   - pwd
-  - terraform --version
-  - terraform init -backend-config="region=aws_east_1"
+  - gitlab-terraform --version
+  - gitlab-terraform init
 
 stages:
   - validate
