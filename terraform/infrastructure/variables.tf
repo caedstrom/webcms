@@ -1,6 +1,7 @@
 variable "aws_region" {
   description = "AWS region to connect to"
   type        = string
+  default     = "us-east-1"
 }
 
 #region Backend
