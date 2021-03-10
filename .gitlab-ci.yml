@@ -60,7 +60,7 @@ before_script:
   - cd ${TF_ROOT}
   - pwd
   - gitlab-terraform --version
-  - gitlab-terraform init
+  - gitlab-terraform init backend=false
 
 stages:
   - validate
