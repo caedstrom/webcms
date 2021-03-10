@@ -13,7 +13,7 @@ variables:
   TF_ROOT: ${CI_PROJECT_DIR}/terraform/infrastructure
   TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/dev
 
-  aws_region: us-east-1
+  TF_VAR_aws_region: us-east-1
   
   # Module-wide variables
   TF_VAR_environment: "preproduction"
