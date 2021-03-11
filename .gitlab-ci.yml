@@ -77,6 +77,8 @@ validate:
 
 plan:
   stage: build
+  tags:
+    - docker
   script:
     - terraform plan -out=$PLAN
     - "terraform show --json $PLAN | convert_report > $JSON_PLAN_FILE"
