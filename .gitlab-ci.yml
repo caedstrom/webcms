@@ -60,8 +60,8 @@ before_script:
   - cd ${TF_ROOT}
   - pwd
   - gitlab-terraform --version
-  - gitlab-terraform init backend=false
-
+  - gitlab-terraform init
+  
 stages:
   - validate
   - build
@@ -73,7 +73,7 @@ validate:
   tags:
     - docker
   script:
-    - terraform validate
+    - gitlab-terraform validate
 
 plan:
   stage: build
