@@ -80,13 +80,14 @@ plan:
   tags:
     - docker
   script:
-    - terraform plan -out=$PLAN
-    - "terraform show --json $PLAN | convert_report > $JSON_PLAN_FILE"
+    - gitlab-terraform plan
+    - gitlab-terraform plan-json
   artifacts:
+    name: plan
     paths:
-      - $PLAN
+      - ${TF_ROOT}/plan.cache
     reports:
-      terraform: $JSON_PLAN_FILE
+      terraform: ${TF_ROOT}/plan.json
 
 # Separate apply job for manual launching Terraform as it can be destructive
 # action.
