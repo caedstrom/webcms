@@ -319,7 +319,7 @@ resource "aws_ecs_service" "drupal" {
 
   # Since we are referencing JSON keys in secrets, we need to use platform version 1.4.0 (this is
   # not yet LATEST at the time of writing).
-  launch_type = "FARGATE"
+  launch_type      = "FARGATE"
   platform_version = "1.4.0"
 
   deployment_controller {

@@ -1,0 +1,100 @@
+stages:
+  - validate
+  - plan
+  - build
+  - deploy
+
+variables:
+  TF_ROOT: "${CI_PROJECT_DIR}/terraform/webcms"
+  JSON_PLAN_FILE: "tfplan.json"
+  PLAN: "plan.tfplan"
+  WEBCMS_ENVIRONMENT: "production"
+  WEBCMS_IMAGE_TAG: "${CI_COMMIT_BRANCH}-${CI_BUILD_ID}"
+  WEBCMS_REPO_URL: "316981092358.dkr.ecr.us-east-1.amazonaws.com"
+  TF_VAR_aws_region: "us-east-1"
+  TF_VAR_environment: "production"
+  TF_VAR_sites: ""
+  TF_VAR_lang: ""
+  TF_VAR_tags: "{}"
+  TF_VAR_image_tag_drupal: ""
+  TF_VAR_image_tag_nginx: ""
+  TF_VAR_image_tag_drush: ""
+  TF_VAR_drupal_hostname: ""
+  TF_VAR_drupal_extra_hostnames: "[]"
+  TF_VAR_drupal_min_capacity: 1
+  TF_VAR_drupal_max_capacity: 1
+  TF_VAR_drupal_state: ""
+  TF_VAR_drupal_use_s3_domain": ""
+  TF_VAR_email_auth_user: ""
+  TF_VAR_email_from: ""
+  TF_VAR_email_host: ""
+  TF_VAR_email_port: ""
+  TF_VAR_email_protocol: ""
+  TF_VAR_email_enable_workflow_notifications: ""
+  TF_VAR_akamai_enabled: ""
+  TF_VAR_akamai_api_host: ""
+  TF_VAR_saml_sp_entity_id: ""
+  TF_VAR_saml_sp_cert: ""
+  TF_VAR_saml_idp_id: ""
+  TF_VAR_saml_idp_sso_url: ""
+  TF_VAR_saml_idp_slo_url: ""
+  TF_VAR_saml_idp_cert: ""
+  TF_VAR_saml_force_saml_login: ""
+
+services:
+  - docker:dind
+
+build:
+  image: docker:latest
+  stage: build
+  script:
+    - apk add --no-cache python3 py-pip
+    - pip install awscli
+    - $(aws ecr get-login --no-include-email --region "${TF_VAR_aws_region}")
+    - bash ./docker-build.sh
+  tags:
+    - docker
+
+validate:
+  image: registry.gitlab.com/gitlab-org/terraform-images/releases/0.14:v0.8.0
+  stage: validate
+  script:
+    - |
+      cd ${TF_ROOT}
+      terraform init
+      terraform fmt -diff -check
+      terraform validate
+
+plan:
+  image: registry.gitlab.com/gitlab-org/terraform-images/releases/0.14:v0.8.0
+  stage: build
+  script:
+    - |
+      cd ${TF_ROOT}
+      terraform init
+      terraform plan -input=false -out ${PLAN}
+      terraform show --json ${PLAN} | convert_report > ${JSON_PLAN_FILE}
+  artifacts:
+    paths:
+      - ${PLAN}
+    reports:
+      terraform: ${JSON_PLAN_FILE}
+
+deploy:
+  image: registry.gitlab.com/gitlab-org/terraform-images/releases/0.14:v0.8.0
+  stage: deploy
+  environment:
+    name: production
+  dependencies:
+    - build
+    - validate
+    - plan
+  when: manual
+  only:
+    - master
+  script:
+    - |
+      cd ${TF_ROOT}
+      terraform init
+      terraform apply -input=false ${PLAN}
+      bash ./run-drush.sh
