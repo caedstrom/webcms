@@ -60,6 +60,7 @@ before_script:
   - cd ${TF_ROOT}
   - pwd
   - gitlab-terraform --version
+  - echo $backend_tf
   - gitlab-terraform init -input=false -backend-config=$backend_tf
     
 stages:
