@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4571bb62d2504c7c9e1bca541eb253c6",
+    "content-hash": "9e6201e95d44985388a40989a48dba3a",
     "packages": [
         {
             "name": "akamai-open/edgegrid-auth",
@@ -9565,7 +9565,8 @@
                     "dev-1.x": "1.x-dev"
                 },
                 "patches_applied": {
-                    "Fix autocomplete": "https://www.drupal.org/files/issues/2021-03-26/viewsreference_filter-autocomplete_problems-and-sort-combined-3201294-6--3168765-4.patch",
+                    "Fix autocomplete": "https://www.drupal.org/files/issues/2021-03-02/viewsreference_filter-autocomplete_problems-3201294-2.patch",
+                    "Provide mechanism to override exposed sorts.": "https://www.drupal.org/files/issues/2021-02-09/viewsreference_filter-exposed_sorts-3168765-4.patch",
                     "Allow different settings for different blocks": "https://www.drupal.org/files/issues/2020-10-20/viewsreference_filter-shared_config-3132416-3.patch",
                     "Fix views dependency declaration": "https://git.drupalcode.org/project/viewsreference_filter/-/merge_requests/1.diff"
                 }
