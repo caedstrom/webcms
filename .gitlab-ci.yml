@@ -10,8 +10,8 @@ image:
 variables:
   PLAN: plan.tfplan
   JSON_PLAN_FILE: tfplan.json
-  TF_ROOT: ${CI_PROJECT_DIR}/terraform/webcms
-  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/dev-webcms-en
+  TF_ROOT: ${CI_PROJECT_DIR}/terraform/infrastructure
+  TF_ADDRESS: ${CI_API_V4_URL}/projects/${CI_PROJECT_ID}/terraform/state/dev-prod
 
   #Run in an automated fashion without console input
   #TF_IN_AUTOMATION: 1
@@ -20,7 +20,7 @@ variables:
   TF_VAR_aws_region: "us-east-1"
 
   # Module-wide variables
-  TF_VAR_environment: "preproduction"
+  TF_VAR_environment: "production"
   TF_VAR_site: 'dev'
   TF_VAR_sites: '["dev"]'
   TF_VAR_lang: 'en'
@@ -28,7 +28,7 @@ variables:
 
   TF_VAR_image_tag: 'initial'
 
-  TF_VAR_drupal_hostname: 'stage-www.epa.gov'
+  TF_VAR_drupal_hostname: 'beta.epa.gov'
   TF_VAR_drupal_extra_hostnames: '["webcms-preproduction-6e916a8cff574d28.elb.us-east-1.amazonaws.com"]'
 
   TF_VAR_drupal_min_capacity: '1'
@@ -56,7 +56,7 @@ variables:
 
   # Load balancer variables
   # cf. load_balancer.tf
-  TF_VAR_lb_default_certificate: "arn:aws:iam::665817092260:server-certificate/LBEPACertificate"
+  TF_VAR_lb_default_certificate: ""
   TF_VAR_lb_extra_certificates: "[]"
   TF_VAR_lb_internal: "true"
 
