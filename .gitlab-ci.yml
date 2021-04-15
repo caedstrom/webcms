@@ -107,7 +107,7 @@ validate:
   script:
     - gitlab-terraform validate
   only:
-    - f1-IaC-updates
+    - f1-IaC-updates-prod
 
 plan:
   stage: build
