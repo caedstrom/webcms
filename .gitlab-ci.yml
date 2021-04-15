@@ -83,7 +83,7 @@ variables:
   TF_VAR_iam_prefix: "Customer"
 
 cache:
-  key: development
+  key: production
   paths:
     - ${TF_ROOT}/.terraform
 
@@ -103,7 +103,7 @@ stages:
 validate:
   stage: validate
   tags:
-    - docker
+    - production
   script:
     - gitlab-terraform validate
   only:
@@ -112,7 +112,7 @@ validate:
 plan:
   stage: build
   tags:
-    - docker
+    - production
   script:
     - gitlab-terraform plan
     - gitlab-terraform plan-json
@@ -130,7 +130,7 @@ plan:
 apply:
   stage: deploy
   tags:
-    - docker
+    - production
   script:
     - gitlab-terraform apply
   dependencies:
