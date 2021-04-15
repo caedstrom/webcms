@@ -123,7 +123,7 @@ plan:
     reports:
       terraform: ${TF_ROOT}/plan.json
   only:
-    - f1-IaC-updates
+    - f1-IaC-updates-prod
 
 # Separate apply job for manual launching Terraform as it can be destructive
 # action.
