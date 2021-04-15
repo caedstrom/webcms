@@ -29,7 +29,7 @@ variables:
   TF_VAR_image_tag: 'initial'
 
   TF_VAR_drupal_hostname: 'beta.epa.gov'
-  TF_VAR_drupal_extra_hostnames: '["webcms-preproduction-6e916a8cff574d28.elb.us-east-1.amazonaws.com"]'
+  TF_VAR_drupal_extra_hostnames: '["webcms-production-291e8a42fd5ab03f.elb.us-east-1.amazonaws.com"]'
 
   TF_VAR_drupal_min_capacity: '1'
   TF_VAR_drupal_max_capacity: '5'
@@ -56,7 +56,7 @@ variables:
 
   # Load balancer variables
   # cf. load_balancer.tf
-  TF_VAR_lb_default_certificate: ""
+  TF_VAR_lb_default_certificate: "arn:aws:iam::687001500421:server-certificate/LBEPACertificate"
   TF_VAR_lb_extra_certificates: "[]"
   TF_VAR_lb_internal: "true"
 
