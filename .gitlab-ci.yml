@@ -21,8 +21,8 @@ variables:
 
   # Module-wide variables
   TF_VAR_environment: "production"
-  TF_VAR_site: 'dev'
-  TF_VAR_sites: '["dev"]'
+  TF_VAR_site: 'prod'
+  TF_VAR_sites: '["prod"]'
   TF_VAR_lang: 'en'
   TF_VAR_tags: "{}"
 
