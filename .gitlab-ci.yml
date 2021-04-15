@@ -137,4 +137,4 @@ apply:
     - plan
   when: manual
   only:
-    - f1-IaC-updates
+    - f1-IaC-updates-prod
