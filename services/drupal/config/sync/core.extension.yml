@@ -86,10 +86,9 @@ module:
   gmedia: 0
   gnode: 0
   group: 0
+  group_content_menu: 0
   group_outsider_in: 0
   groupmedia: 0
-  groupmenu: 0
-  groupmenu_block: 0
   hal: 0
   hierarchical_term_formatter: 0
   honeypot: 0
@@ -159,6 +158,7 @@ module:
   shs: 0
   simple_sitemap: 0
   siteimprove: 0
+  smart_trim: 0
   smtp: 0
   syslog: 0
   system: 0
