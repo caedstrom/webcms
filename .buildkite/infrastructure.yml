@@ -1,3 +1,6 @@
+env:
+  WEBCMS_IMAGE_TAG: ${WEBCMS_IMAGE_TAG}
+
 steps:
   # Apply any pending updates to the VPC for this environment
   - label: ":pipeline: :terraform: network"
