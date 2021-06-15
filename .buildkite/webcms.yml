@@ -66,6 +66,13 @@ steps:
               npm ci
               node drush.js
 
+          environment:
+            - AWS_REGION=us-east-2
+            - WEBCMS_ENVIRONMENT
+            - WEBCMS_SITE
+            - WEBCMS_LANG
+            - WEBCMS_IMAGE_TAG
+
     env:
       WEBCMS_LANG: en
 
@@ -80,6 +87,13 @@ steps:
               cd ci
               npm ci
               node drush.js
+
+          environment:
+            - AWS_REGION=us-east-2
+            - WEBCMS_ENVIRONMENT
+            - WEBCMS_SITE
+            - WEBCMS_LANG
+            - WEBCMS_IMAGE_TAG
 
     env:
       WEBCMS_LANG: es
