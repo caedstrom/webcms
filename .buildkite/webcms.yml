@@ -15,6 +15,9 @@ steps:
   - label: ":docker: Build images"
     command: bash .buildkite/build-images.sh
 
+    env:
+      WEBCMS_REPO_URL: ${WEBCMS_REPO_URL}
+
     # Limit Docker builds to one per branch, to avoid overutilizing the Buildkite agent
     # pool.
     concurrency_group: $BUILDKITE_PIPELINE_SLUG/build-$BUILDKITE_BRANCH
