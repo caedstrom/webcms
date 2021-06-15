@@ -55,13 +55,31 @@ steps:
   - wait: ~
 
   - label: ":ecs: Drush (${WEBCMS_SITE}-en)"
-    command: bash .buildkite/run-drush.sh
+    plugins:
+      - docker#v3.8.0:
+          image: node:14-alpine
+          entrypoint: /bin/sh
+          command:
+            - -ec
+            - |
+              cd ci
+              npm ci
+              node drush.js
 
     env:
       WEBCMS_LANG: en
 
   - label: ":ecs: Drush (${WEBCMS_SITE}-es)"
-    command: bash .buildkite/run-drush.sh
+    plugins:
+      - docker#v3.8.0:
+          image: node:14-alpine
+          entrypoint: /bin/sh
+          command:
+            - -ec
+            - |
+              cd ci
+              npm ci
+              node drush.js
 
     env:
       WEBCMS_LANG: es
