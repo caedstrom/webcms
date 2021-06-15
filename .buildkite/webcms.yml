@@ -67,4 +67,4 @@ steps:
 
     command: bash .buildkite/run-drush.sh
     env:
-      WEBCMS_LANG: en
+      WEBCMS_LANG: es
