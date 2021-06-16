@@ -56,6 +56,9 @@ steps:
 
   - label: ":ecs: Drush (${WEBCMS_SITE}-en)"
     plugins:
+      - cultureamp/aws-assume-role#v0.1.0:
+          role: arn:aws:iam::316981092358:role/BuildkiteRoleForECSTasks
+
       - docker#v3.8.0:
           image: node:14-alpine
           entrypoint: /bin/sh
@@ -66,6 +69,7 @@ steps:
               npm ci
               node drush.js
 
+          propagate-aws-auth-tokens: true
           environment:
             - AWS_REGION=us-east-2
             - WEBCMS_ENVIRONMENT
@@ -78,6 +82,9 @@ steps:
 
   - label: ":ecs: Drush (${WEBCMS_SITE}-es)"
     plugins:
+      - cultureamp/aws-assume-role#v0.1.0:
+          role: arn:aws:iam::316981092358:role/BuildkiteRoleForECSTasks
+
       - docker#v3.8.0:
           image: node:14-alpine
           entrypoint: /bin/sh
@@ -88,6 +95,7 @@ steps:
               npm ci
               node drush.js
 
+          propagate-aws-auth-tokens: true
           environment:
             - AWS_REGION=us-east-2
             - WEBCMS_ENVIRONMENT
