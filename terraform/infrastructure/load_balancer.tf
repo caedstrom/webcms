@@ -6,7 +6,8 @@ resource "aws_lb" "load_balancer" {
   subnets            = local.public_subnets
 
   access_logs {
-    bucket  = aws_s3_bucket.elb_logs.bucket
+    bucket  = "${var.alb_logging_bucket}"
+    prefix = "AWSLogs"
     enabled = true
   }
 

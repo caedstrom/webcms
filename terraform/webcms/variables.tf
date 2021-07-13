@@ -40,6 +40,12 @@ variable "image_tag" {
   type        = string
 }
 
+variable "alb_logging_bucket" {
+  description = "GDIT created bucket to store load balancer logs"
+  type = string
+  default = "687001500421-lb-access-logs"
+}
+
 #endregion
 
 #region Drupal service configuration
