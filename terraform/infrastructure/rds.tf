@@ -70,8 +70,6 @@ resource "aws_rds_cluster" "db" {
   master_username = "root"
   master_password = random_password.rds_root_password.result
 
-  backup_retention_period      = 30
-  preferred_backup_window      = "04:00-06:00"
   preferred_maintenance_window = "sun:06:00-sun:08:00"
 
   skip_final_snapshot = true
@@ -90,7 +88,13 @@ resource "aws_rds_cluster" "db" {
   db_subnet_group_name   = aws_db_subnet_group.default.name
   vpc_security_group_ids = [data.aws_ssm_parameter.database_security_group.value]
 
-  tags = var.tags
+  tags = merge(
+    var.tags,
+    {
+      cpm backup="EPAWEB-Prod"
+    },
+  )
+ 
 
   # Ignore changes to the master password since it's stored in the Terraform state.
   # Instead, the value in Parameter Store should be treated as the sole source of truth.
