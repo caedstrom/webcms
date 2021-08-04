@@ -1,0 +1,40 @@
+diff --git a/linkit.module b/linkit.module
+index e9159be..3f127ce 100644
+--- a/linkit.module
++++ b/linkit.module
+@@ -123,10 +123,10 @@ function linkit_form_editor_link_dialog_alter(&$form, FormStateInterface $form_s
+ function linkit_form_editor_link_dialog_submit(array &$form, FormStateInterface $form_state) {
+   $link_element = $form_state->get('link_element');
+ 
+-  $href = parse_url($form_state->getValue(['attributes', 'href']), PHP_URL_PATH);
++  $path = parse_url($form_state->getValue(['attributes', 'href']), PHP_URL_PATH);
+   $href_dirty_check = parse_url($form_state->getValue(['href_dirty_check']), PHP_URL_PATH);
+ 
+-  if ($href !== $href_dirty_check) {
++  if ($path !== $href_dirty_check) {
+     $form_state->unsetValue(['attributes', 'data-entity-type']);
+     $form_state->unsetValue(['attributes', 'data-entity-uuid']);
+     $form_state->unsetValue(['attributes', 'data-entity-substitution']);
+@@ -134,11 +134,19 @@ function linkit_form_editor_link_dialog_submit(array &$form, FormStateInterface
+ 
+   $fields = [
+     'href',
+-    'data-entity-type',
+-    'data-entity-uuid',
+-    'data-entity-substitution',
+   ];
+ 
++  // When only a an anchor link is entered as the href with no path (ex: #main),
++  // we don't want to include the data attributes that we would otherwise
++  // included if this link included a path.
++  if (!empty($path)) {
++    $fields = array_merge($fields, [
++      'data-entity-type',
++      'data-entity-uuid',
++      'data-entity-substitution',
++    ]);
++  }
++
+   foreach ($fields as $field_name) {
+     $value = $form_state->getValue(['attributes', $field_name]);
+     if (empty($value)) {
