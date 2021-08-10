@@ -8,6 +8,7 @@ import accordion from 'uswds/src/js/components/accordion.js';
 import navigation from './modules/navigation';
 import banner from 'uswds/src/js/components/banner.js';
 import tablesort from './modules/tablesort';
+import tooltip from 'uswds/src/js/components/tooltip.js';
 import backToTop from './modules/_back-to-top.es6';
 import setScrollbarProperty from './modules/scrollbar-property.es6';
 import 'svgxuse';
@@ -36,6 +37,7 @@ import 'svgxuse';
     accordion.on(document.body);
     banner.on(document.body);
     navigation(); // If used with the USWDS accordion component, the navigation must run after it.
+    tooltip.on(document.body);
     tablesort();
     backToTop();
     setScrollbarProperty();

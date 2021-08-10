@@ -1,0 +1,103 @@
+// Variables
+$triangle-size: 5px;
+$border-radius: rem(3px) !default;
+
+/* Tooltips */
+.usa-tooltip {
+  display: inline-block;
+  position: relative;
+}
+
+.usa-tooltip__trigger {
+  cursor: pointer;
+
+  > svg {
+    display: block;
+    pointer-events: none;
+  }
+}
+
+.usa-tooltip__body,
+.usa-tooltip__body--top {
+  background-color: color($theme-tooltip-background-color);
+  border-radius: $border-radius;
+  color: color($theme-tooltip-font-color);
+  display: none;
+  font-size: rem(14px);
+  padding: rem(8px);
+  pointer-events: none;
+  position: absolute;
+  transition: opacity 0.08s ease-in-out;
+  white-space: pre;
+  width: auto;
+  z-index: 100000;
+
+  &::after {
+    border-left: $triangle-size solid transparent;
+    border-right: $triangle-size solid transparent;
+    border-top: $triangle-size solid color($theme-tooltip-background-color);
+    bottom: -$triangle-size;
+    content: '';
+    display: block;
+    height: 0;
+    left: 50%;
+    margin-left: -$triangle-size;
+    pointer-events: none;
+    position: absolute;
+    width: 0;
+  }
+}
+
+.usa-tooltip__body--wrap {
+  min-width: calc(100vw / 2);
+  text-align: center;
+  white-space: normal;
+  width: 100%;
+}
+
+.usa-tooltip__body.is-set {
+  display: block;
+}
+
+.usa-tooltip__body.is-visible {
+  opacity: 1;
+}
+
+.usa-tooltip__body--bottom {
+  &::after {
+    border-bottom: $triangle-size solid color($theme-tooltip-background-color);
+    border-left: $triangle-size solid transparent;
+    border-right: $triangle-size solid transparent;
+    border-top: 0;
+    bottom: auto;
+    top: -$triangle-size;
+  }
+}
+
+.usa-tooltip__body--right {
+  &::after {
+    border-bottom: $triangle-size solid transparent;
+    border-left: 0;
+    border-right: $triangle-size solid color($theme-tooltip-background-color);
+    border-top: $triangle-size solid transparent;
+    bottom: 0;
+    left: -$triangle-size;
+    margin: -$triangle-size 0 0 0;
+    right: auto;
+    top: 50%;
+  }
+}
+
+.usa-tooltip__body--left {
+  &::after {
+    border-bottom: $triangle-size solid transparent;
+    border-left: $triangle-size solid color($theme-tooltip-background-color);
+    border-right: 0;
+    border-top: $triangle-size solid transparent;
+    bottom: 0;
+    left: auto;
+    margin: -$triangle-size 0 0 0;
+    right: -$triangle-size;
+    top: 50%;
+  }
+}

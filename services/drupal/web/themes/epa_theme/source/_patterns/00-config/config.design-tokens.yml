@@ -83,6 +83,8 @@ uswds:
   link-visited-color: 'violet-70v'
   link-hover-color: 'primary-dark'
   link-active-color: 'primary-darker'
+  tooltip-background-color: 'gray-cool-70'
+  tooltop-font-color: 'gray-cool-10'
 gesso:
   palette:
     brand:
