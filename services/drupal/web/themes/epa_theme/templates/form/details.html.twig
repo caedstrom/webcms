@@ -28,7 +28,8 @@
   {% include '@uswds/_accordion/_accordion-content.twig' with {
     'content': detail_content,
     'content_id': '0',
-    'title': title is not empty ? title : 'Details'|t,
+    'title': title is not empty ? title.title : 'Details'|t,
+    'help': title is not empty ? title.help : false,
     'accordion_id': element['#webform_key'],
   } %}
 {% endset %}
