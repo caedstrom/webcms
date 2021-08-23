@@ -1,0 +1,52 @@
+{% set columns = 0 %}
+{% set content_first = content.first|render %}
+{% set content_second = content.second|render %}
+{% set content_third = content.third|render %}
+{% set content_fourth = content.fourth|render %}
+
+{% if content_first %}
+  {% set columns = columns + 1 %}
+{% endif %}
+
+{% if content_second %}
+  {% set columns = columns + 1 %}
+{% endif %}
+
+{% if content_third %}
+  {% set columns = columns + 1 %}
+{% endif %}
+
+{% if content_fourth %}
+  {% set columns = columns + 1 %}
+{% endif %}
+
+{% if columns > 1 %}
+  {%
+    set classes = [
+    'l-grid',
+    'l-grid--' ~ columns  ~ '-col'
+  ]
+  %}
+  <div{{ attributes.addClass(classes) }}>
+    {% if content_first %}
+      <div{{ region_attributes.first }}>{{ content_first }}</div>
+    {% endif %}
+
+    {% if content_second %}
+      <div{{ region_attributes.second }}>{{ content_second }}</div>
+    {% endif %}
+
+    {% if content_third %}
+      <div{{ region_attributes.third }}>{{ content_third }}</div>
+    {% endif %}
+
+    {% if content_fourth %}
+      <div{{ region_attributes.fourth }}>{{ content_fourth }}</div>
+    {% endif %}
+  </div>
+{% else %}
+  {{ content_first }}
+  {{ content_second }}
+  {{ content_third }}
+  {{ content_fourth }}
+{% endif %}

@@ -4,9 +4,9 @@ status: true
 dependencies:
   config:
     - field.field.media.audio.field_author
-    - field.field.media.audio.field_keywords
     - field.field.media.audio.field_limit_file_accessibility
     - field.field.media.audio.field_media_audio_file
+    - field.field.media.audio.field_media_tags
     - field.field.media.audio.field_running_time
     - field.field.media.audio.field_transcript
     - media.type.audio
@@ -34,6 +34,7 @@ content:
       download_text: 'Download Audio'
       autoplay: 0
       loop: 0
+      preload: none
     third_party_settings: {  }
     region: content
   field_running_time:
@@ -55,8 +56,8 @@ hidden:
   created: true
   entitygroupfield: true
   field_author: true
-  field_keywords: true
   field_limit_file_accessibility: true
+  field_media_tags: true
   langcode: true
   name: true
   search_api_excerpt: true

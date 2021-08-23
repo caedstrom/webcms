@@ -59,7 +59,6 @@ third_party_settings:
         - field_channel
         - field_geographic_locations
         - field_env_laws_regs_and_treaties
-        - field_is_searchable_collection
       parent_name: group_additional_fields
       weight: 7
       format_type: tab
@@ -168,12 +167,12 @@ content:
   field_faq_taxonomy_topics:
     weight: 5
     settings:
-      match_operator: CONTAINS
-      size: 60
-      placeholder: ''
-      match_limit: 10
+      force_deepest: false
+      display_node_count: false
+      create_new_items: false
+      create_new_levels: false
     third_party_settings: {  }
-    type: entity_reference_autocomplete
+    type: options_shs
     region: content
   field_geographic_locations:
     weight: 14
@@ -194,13 +193,6 @@ content:
       match_limit: 10
     third_party_settings: {  }
     type: entity_reference_autocomplete
-    region: content
-  field_is_searchable_collection:
-    weight: 17
-    settings:
-      display_label: true
-    third_party_settings: {  }
-    type: boolean_checkbox
     region: content
   field_keywords:
     weight: 11
@@ -322,6 +314,7 @@ content:
     settings: {  }
     third_party_settings: {  }
 hidden:
+  field_is_searchable_collection: true
   field_last_published: true
   field_review_deadline: true
   field_scheduled_transition: true

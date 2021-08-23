@@ -41,7 +41,14 @@ trait EpaMediaWysiwygTransformTrait {
 
     $inline_embed_replacement_template = <<<'TEMPLATE'
 <drupal-inline-media
-  data-align="center"
+  data-entity-type="media"
+  data-view-mode="link_with_metadata"
+  data-entity-uuid="%s"></drupal-inline-media>
+TEMPLATE;
+
+    // We migrate documents with the description displayed by default.
+    $inline_embed_pdf_replacement_template = <<<'TEMPLATE'
+<drupal-inline-media
   data-entity-type="media"
   data-view-mode="link_with_description"
   data-entity-uuid="%s"></drupal-inline-media>
@@ -50,22 +57,30 @@ TEMPLATE;
     // Fix these malformed JSON strings
     $wysiwyg_content = str_replace('"alt":"\\\\\\"""', '"alt":""', $wysiwyg_content);
 
-    $wysiwyg_content = preg_replace_callback($pattern, function ($matches) use ($inline_embed_replacement_template, $entityTypeManager, $view_modes, $remove_alignment) {
+    $wysiwyg_content = preg_replace_callback($pattern, function ($matches) use ($inline_embed_replacement_template, $inline_embed_pdf_replacement_template, $entityTypeManager, $view_modes, $remove_alignment) {
       $decoder = new JsonDecode(TRUE);
 
       try {
         $tag_info = $decoder->decode($matches['tag_info'], JsonEncoder::FORMAT);
 
-        $media_entity_uuid = $entityTypeManager->getStorage('media')
+        $media_entity = $entityTypeManager->getStorage('media')
           ->load($tag_info['fid']);
+        $media_entity_uuid = $media_entity ? $media_entity->uuid() : 0;
 
-        $media_entity_uuid = $media_entity_uuid ? $media_entity_uuid->uuid() : 0;
-
-        if ($tag_info['view_mode'] === 'media_link') {
-          return sprintf($inline_embed_replacement_template,
-            $media_entity_uuid
-          );
+        // Return an inline media embed.
+        if ($media_entity && $tag_info['view_mode'] === 'media_link') {
+          if ($media_entity->bundle() === 'document') {
+            return sprintf($inline_embed_pdf_replacement_template,
+              $media_entity_uuid
+            );
+          }
+          else {
+            return sprintf($inline_embed_replacement_template,
+              $media_entity_uuid
+            );
+          }
         }
+        // Return a full media embed.
         else {
           $doc = new \DOMDocument();
           $el = $doc->createElement('drupal-media');
@@ -74,7 +89,7 @@ TEMPLATE;
           $el->setAttribute('data-view-mode', $view_modes[$tag_info['view_mode']]);
 
           $alignment = $remove_alignment ? '' : $tag_info['fields']['field_image_alignment[und]'] ?? 'center';
-          $el->setAttribute('data-align',$alignment);
+          $el->setAttribute('data-align', $alignment);
 
           $caption = stripslashes(urldecode($tag_info['fields']['field_caption[und][0][value]'] ?? ''));
           if (!empty($caption)) {
@@ -83,10 +98,34 @@ TEMPLATE;
 
           $alt = $tag_info['fields']['field_file_image_alt_text[und][0][value]'] ?? '';
           if (!empty($alt)) {
-            $el->setAttribute('alt',$alt);
+            $el->setAttribute('alt', $alt);
           }
 
-          $doc->appendChild($el);
+          // If the 'link to original' setting is selected in D7, wrap the
+          // <drupal-media> element in a link to the original image.
+          $link_to_original = $tag_info['fields']['field_original_image_link[und]'] ?? '';
+          if (!empty($link_to_original) && $link_to_original == 1 && $media_entity && $media_entity->bundle->entity->label() == 'Image') {
+            $original_image_url = $media_entity->field_media_image->entity->getFileUri();
+            if (str_starts_with($original_image_url, 'public://')) {
+              // Since we have to hard-code a link here, and we are inconsistent
+              // in various environments as to what domain files are hosted on,
+              // we need to reference /sites/default/files/* which
+              // EpaMediaS3fsSubscriber will then ensure will get redirected to
+              // the right location if the file doesn't actually exist there.
+              $original_image_url = substr_replace($original_image_url, '/sites/default/files/', 0, 9);
+              $link_element = $doc->createElement('a');
+              $link_element->setAttribute('href', $original_image_url);
+              $link_element->appendChild($el);
+              $doc->appendChild($link_element);
+            }
+            else {
+              $doc->appendChild($el);
+            }
+          }
+          else {
+            $doc->appendChild($el);
+          }
+
           return $doc->saveHTML();
         }
       }
@@ -140,7 +179,10 @@ TEMPLATE;
       try {
         $decoder = new JsonDecode(TRUE);
         $tag_info = $decoder->decode($captured, JsonEncoder::FORMAT);
-        if ($tag_info['view_mode'] == 'block_header') {
+        $view_mode = $tag_info['view_mode'] ?? '';
+        $width = $tag_info['attributes']['width'] ?? '';
+        $height = $tag_info['attributes']['height'] ?? '';
+        if ($view_mode == 'block_header' || ($width == 325 && $height == 100)) {
           $block_header = [
             'target_id' => $tag_info['fid'],
             'alt' => $tag_info['attributes']['alt'],
@@ -150,8 +192,8 @@ TEMPLATE;
           // remove the link and capture its href. Allow only whitespace
           // other than that media object. These patterns aren't bulletproof
           // but if they fail, it just leaves an empty link.
-          $p1 = '~(.*)<a [^>]*\bhref="([^"]+)"[^>]*>\s*~';
-          $p2 = '~\s*</a>(.*)~';
+          $p1 = '~(.*)<a [^>]*\bhref="([^"]+)"[^>]*>\s*~s';
+          $p2 = '~\s*</a>(.*)~s';
 
           $url = NULL;
           if (preg_match($p1, $before, $m1) && preg_match($p2, $after, $m2)) {
@@ -164,9 +206,9 @@ TEMPLATE;
           }
 
           // Let's try to remove the surrounding figure div as well
-          $p1 = '~(.*)<div [^>]*\bclass="([^"]+)"[^>]*>\s*~';
+          $p1 = '~(.*)<div [^>]*\bclass="([^"]+)"[^>]*>\s*~s';
           $class_pattern = '~\bfigure\b~';
-          $p2 = '~\s*</div>(.*)~';
+          $p2 = '~\s*</div>(.*)~s';
           if (preg_match($p1, $before, $m1)
             && preg_match($class_pattern, $m1[2])
             && preg_match($p2, $after, $m2)

@@ -28,7 +28,7 @@ class EpaOgMenuLink extends MenuLink {
 
     $query->leftJoin('og_menu', 'om', 'ml.menu_name = om.menu_name');
     $query->condition('om.menu_name', NULL, 'IS NOT NULL');
-
+    $query->fields('om', ['gid']);
     return $query;
   }
 
@@ -36,10 +36,21 @@ class EpaOgMenuLink extends MenuLink {
    * {@inheritdoc}
    */
   public function prepareRow(Row $row) {
-    // Change menu name from 'menu-og-id' to 'group-id-menu'.
-    $pattern = '/menu-og-(\d+)/';
-    $replacement = 'group-${1}-menu';
-    $row->setSourceProperty('d8_menu_name', preg_replace($pattern, $replacement, $row->getSourceProperty('menu_name')));
+    // Standardize D8 menu name to 'group_menu_link_content-id'.
+    // Group content menus are created automatically when the groups are created
+    // and the ID does not match anything in D7 so we have to look it up.
+    $gid = $row->getSourceProperty('gid');
+    $menu_entity_id = '';
+
+    $group = $this->entityTypeManager->getStorage('group')->load($gid);
+    if ($group) {
+      $menus = group_content_menu_get_menus_per_group($group);
+      // Assuming there's one menu since we're working with migrated content.
+      foreach ($menus as $menu) {
+        $menu_entity_id = $menu->entity_id->entity->id();
+      }
+    }
+    $row->setSourceProperty('d8_menu_name', "group_menu_link_content-${menu_entity_id}");
 
     return parent::prepareRow($row);
   }

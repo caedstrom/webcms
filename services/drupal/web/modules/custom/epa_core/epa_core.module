@@ -220,6 +220,10 @@ function epa_core_token_info() {
     'description' => t('The current entity\'s latest updated date.'),
     'type' => 'date'
   ];
+  $view_argument_1 = [
+    'name' => 'The first argument of the view'
+  ];
+
   $tokens['tokens'] = [
     'node' => [
       'machine-name-alias' => $machine_name_token,
@@ -230,6 +234,9 @@ function epa_core_token_info() {
     'current-page' => [
       'contact-us-link' => $contact_us_link,
       'footer-last-updated' => $footer_last_updated,
+    ],
+    'view' => [
+      'argument-1' => $view_argument_1,
     ]
   ];
   return $tokens;
@@ -265,6 +272,7 @@ function epa_core_tokens($type, $tokens, array $data, array $options, Bubbleable
             ->getNodeReferencingGroups($node);
           foreach ($groups as $group) {
             $contact_form = $group->field_contact_us_form->target_id;
+            $bubbleable_metadata->addCacheableDependency($group);
             $url = $contact_form ? Url::fromRoute('entity.node.canonical', ['node' => $contact_form]) : NULL;
             $replacements[$original] = $url ? Link::fromTextAndUrl(t('Contact Us'), $url)
               ->toString() : $original;
@@ -279,6 +287,7 @@ function epa_core_tokens($type, $tokens, array $data, array $options, Bubbleable
           $groups = \Drupal::service('epa_web_areas.web_areas_helper')
             ->getNodeReferencingGroups($node);
           foreach ($groups as $group) {
+            $bubbleable_metadata->addCacheableDependency($group);
             $contact_form = $group->field_contact_us_form->target_id;
             $url = $contact_form ? Url::fromRoute('entity.node.canonical', ['node' => $contact_form]) : NULL;
             if ($url) {
@@ -292,11 +301,23 @@ function epa_core_tokens($type, $tokens, array $data, array $options, Bubbleable
       case 'footer-last-updated':
         $node = \Drupal::routeMatch()->getParameter('node');
         $bubbleable_metadata->addCacheContexts(['url']);
+        if (isset($node)) {
+          $bubbleable_metadata->addCacheableDependency($node);
+        }
         if (isset($node) && !$node->field_last_published->isEmpty()) {
           $replacements[$original] = t('Last updated on @date', ['@date' => \Drupal::service('date.formatter')->format($node->field_last_published->date->getTimestamp(), $parts[1], $parts[2])]);
         }
         else {
           $replacements[$original] = '';
+        }
+        break;
+      case 'argument-1':
+        if ($type == 'view' && !empty($data['view'])) {
+          $view = $data['view'];
+          $args = $view->args;
+          if (!empty($args)) {
+            $replacements[$original] = $args[0];
+          }
         }
         break;
     }
@@ -357,67 +378,6 @@ function epa_core_form_alter(&$form, FormStateInterface $form_state, $form_id) {
 }
 
 /**
- * Implements hook_entity_presave().
- */
-function epa_core_node_presave(NodeInterface $node) {
-  if ($node->bundle() == 'public_notice') {
-    // Automatically populate notice's field_geographic_locations field with
-    // data from field_location_of_prop_action to avoid making users enter it
-    // twice.
-    $geo_location_terms = [];
-    if (!$node->field_locations_of_prop_actions->isEmpty()) {
-      foreach ($node->field_locations_of_prop_actions as $item) {
-        if (is_object($item->entity)) {
-          $location = $item->entity;
-          if (!$location->field_state_or_territory->isEmpty()) {
-            $geo_location_terms[] = [
-              'target_id' => $location->field_state_or_territory->target_id,
-            ];
-          }
-        }
-      }
-    }
-    $node->set('field_geographic_locations', $geo_location_terms);
-
-    // Set computed date based on extension and due date. If neither are set, clear it.
-    // If only extension date is set, do nothing.
-    $due_date = $node->field_comments_due_date->value;
-    $extension_date = $node->field_comments_extension_date->value;
-
-    if ($due_date) {
-      if ($extension_date) {
-        $node->set('field_computed_comments_due_date', $extension_date);
-      }
-      else {
-        $node->set('field_computed_comments_due_date', $due_date);
-      }
-    }
-    elseif (!$extension_date) {
-      $node->set('field_computed_comments_due_date', NULL);
-    }
-
-    // If computed date was set, use it. Otherwise set a date 90 days out.
-    if ($computed_date = $node->field_computed_comments_due_date->value) {
-      $node->set('field_notice_sort_date', $computed_date);
-    }
-    else {
-      $date = new DrupalDateTime();
-      $date->add(new DateInterval("P90D"));
-
-      // Set field value
-      $node->set('field_notice_sort_date', $date->format('Y-m-d'));
-    }
-  }
-  if ($node->bundle() == 'news_release') {
-    $term = taxonomy_term_load_multiple_by_name('news release', 'type');
-    if (!empty($term)) {
-      $term = reset($term);
-      $node->field_type = $term->id();
-    }
-  }
-}
-
-/**
  * Implements hook_ENTITY_TYPE_view_alter().
  */
 function epa_core_node_view_alter(array &$build, EntityInterface $entity, EntityViewDisplayInterface $display) {
@@ -458,6 +418,29 @@ function epa_core_field_widget_form_alter(array &$element, FormStateInterface $f
       _epa_core_augment_datetime_description($element['#description']);
     }
   }
+
+
+  if ($plugin_id == 'link_default') {
+    $test = 'test';
+  }
+
+  // If a link field only supports external links remove the confusing help text
+  // the widget provides by default.
+  // The complicated logic here is necessary because the structure of this text
+  // differs depending on whether the field has additional descriptive text configured.
+  if ($plugin_id == 'link_default' && isset($element["uri"]["#description"]))  {
+    if ((is_array($element["uri"]["#description"])
+      && is_array($element["uri"]["#description"]['#items'])
+      && $element["uri"]["#description"]["#items"][1]->getUntranslatedString() == 'This must be an external URL such as %url.')
+    || is_a($element["uri"]["#description"], 'Drupal\Core\StringTranslation\TranslatableMarkup')) {
+      if (isset($element["#description"])) {
+        $element["uri"]["#description"] = $element["#description"];
+      }
+      else {
+        unset($element["uri"]["#description"]);
+      }
+    }
+  }
 }
 
 /**
@@ -486,7 +469,7 @@ function _epa_core_augment_datetime_description(&$field_description) {
  * Implements hook_entity_bundle_field_info_alter().
  */
 function epa_core_entity_bundle_field_info_alter(&$fields, \Drupal\Core\Entity\EntityTypeInterface $entity_type, $bundle) {
-  $env_lang = getenv('WEBCMS_ENV_LANG');
+  $env_lang = getenv('WEBCMS_LANG');
   if (isset($env_lang) && $env_lang === 'es' && $entity_type->id() == 'node' && !empty($fields['field_language'])) {
     $fields['field_language']->setDefaultValue('es');
   }

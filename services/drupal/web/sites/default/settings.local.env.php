@@ -18,11 +18,18 @@ $settings['s3fs.secret_key'] = 'minio_secret';
 
 // Override the endpoint used by s3fs in order to talk to Minio.
 $config['s3fs.settings']['use_customhost'] = TRUE;
+
+// This relies on this patch: https://www.drupal.org/node/3203137 -- it causes
+// the bucket name (drupal, in this case) to be tacked on to the end of the
+// domain. We can't just add /drupal to the domain because the S3FS module
+// doesn't allow that to work in the way we need if you've also specified a port,
+// as we have.
+$config['s3fs.settings']['use_path_style_endpoint'] = TRUE;
 $config['s3fs.settings']['hostname'] = 'minio:9000';
 
-// Override output to point to localhost:8888/drupal in order to see Minio-saved files
+// Override output to point to localhost:8888 in order to see Minio-saved files
 $config['s3fs.settings']['use_cname'] = TRUE;
-$config['s3fs.settings']['domain'] = 'localhost:8888/drupal';
+$config['s3fs.settings']['domain'] = 'localhost:8888';
 
 // Map twig cache onto shared filesystem to allow drush to clear and write twig cache for local development.
 $settings['php_storage']['twig']['directory'] = '/var/www/html/web/sites/default/files/tmp/cache/twig';
@@ -42,3 +49,12 @@ if (defined('Memcached::OPT_CLIENT_MODE')) {
 $settings['container_yamls'][] = DRUPAL_ROOT . '/sites/development.services.yml';
 
 ini_set('max_execution_time', 0);
+
+// Provide override configuration for epa_cloudwatch to redirect
+// logging to Localstack (see https://github.com/localstack/localstack)
+$config['epa_cloudwatch']['endpoint'] = 'http://localstack:4566';
+$config['epa_cloudwatch']['credentials'] = [
+  'access_key' => 'foo',
+  'secret_key' => 'bar',
+];
+$config['epa_cloudwatch']['log_stream'] = 'app-drupal';

@@ -11,8 +11,6 @@ use Drupal\migrate\MigrateExecutableInterface;
 use Drupal\migrate\ProcessPluginBase;
 use Drupal\migrate\Row;
 use Drupal\node\Entity\Node;
-use Drupal\pathauto\PathautoState;
-use Drupal\redirect\Exception\RedirectLoopException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -99,15 +97,11 @@ class EpaSetLatestRevision extends ProcessPluginBase implements ContainerFactory
     $nid = $value[0];
     $d7_vid = $value[1];
 
-    $node = $this->entityTypeManager->getStorage('node')->load($nid);
+    $node_storage = $this->entityTypeManager->getStorage('node');
+    $node = $node_storage->load($nid);
     if (!$node) {
       // If the node doesn't exist in D8, we can't do anything here.
       throw new MigrateException('Unable to load node to set latest revision');
-    }
-    else {
-      // If we have a node, turn on 'generate automatic alias' and continue with
-      // revision logic.
-      $this->pathautoOn($node);
     }
 
     // Get timestamp and state for the current revision.
@@ -140,7 +134,7 @@ class EpaSetLatestRevision extends ProcessPluginBase implements ContainerFactory
     // current revision (as obtained from D7), retaining its same state.
     //
     // If they do match, skip this step and goto forward revision logic.
-    if ($node->vid !== $d7_vid) {
+    if ($node->getRevisionId() !== $d7_vid) {
       // There's a vid mismatch, re-save d7_current_revision in D8 with the
       // correct state.
       $new_current_revision_state = $state_map[$d7_current_revision->state] ?? $d7_current_revision->state;
@@ -163,7 +157,10 @@ class EpaSetLatestRevision extends ProcessPluginBase implements ContainerFactory
 
       $newer_draft_revision = $this->getHeaviestDraftRevision($d7_forward_revisions);
 
-      if ($newer_draft_revision->vid < $d7_vid) {
+      // If the newer draft revision has a vid lower than the latest revision,
+      // we want to give it a new vid so it is set as the latest revision.
+      $d8_latest_revision_id = $node_storage->getLatestRevisionId($node->id());
+      if ($newer_draft_revision->vid < $d8_latest_revision_id) {
 
         $new_latest_revision_state = $state_map[$newer_draft_revision->state] ?? $newer_draft_revision->state;
 
@@ -171,15 +168,21 @@ class EpaSetLatestRevision extends ProcessPluginBase implements ContainerFactory
           ->getStorage('node')
           ->loadRevision($newer_draft_revision->vid);
 
-        $new_latest_revision->createDuplicate();
-        $new_latest_revision->set('moderation_state', $new_latest_revision_state);
-        $new_latest_revision->setRevisionLogMessage(t('During D7 migration, this revision was set as the latest revision.&emsp;|&emsp;') . $new_latest_revision->getRevisionLogMessage());
-        $new_latest_revision->save();
+        if ($new_latest_revision) {
+          $new_latest_revision->createDuplicate();
+          $new_latest_revision->set('moderation_state', $new_latest_revision_state);
+          $new_latest_revision->setRevisionLogMessage(t('During D7 migration, this revision was set as the latest revision.&emsp;|&emsp;') . $new_latest_revision->getRevisionLogMessage());
+          $new_latest_revision->save();
 
-        $this->logger->notice('Updated latest revision for Node ID: %nid,  Revision ID: %vid.', ['%nid' => $nid, '%vid' => $d7_vid]);
+          $this->logger->notice('Updated latest revision for Node ID: %nid,  Revision ID: %vid.', ['%nid' => $nid, '%vid' => $d7_vid]);
+        }
       }
     }
 
+    // Now that we've set the correct revisions, let's turn on pathauto and
+    // reset the cache for this node.
+    \Drupal::keyValue('pathauto_state.node')->set($nid, 1);
+    $node_storage->resetCache([$nid]);
     return TRUE;
   }
 
@@ -211,24 +214,6 @@ class EpaSetLatestRevision extends ProcessPluginBase implements ContainerFactory
     }
 
     return $heaviest_revision;
-  }
-
-  /**
-   * Turn on 'generate automatic URL alias.
-   *
-   * @param \Drupal\node\Entity\Node $node
-   *   The node entity.
-   */
-  private function pathautoOn(Node $node) {
-    $node->set('path', ['pathauto' => PathautoState::CREATE]);
-
-    try {
-      $node->save();
-    }
-    catch (RedirectLoopException $e) {
-      $this->logger->notice('There was a problem enabling pathauto for nid: %nid. Caught RedirectLoopException: %message', ['%nid' => $node->id(), '%message' => $e->getMessage()]);
-    }
-
   }
 
 }

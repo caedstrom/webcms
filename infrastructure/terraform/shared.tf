@@ -18,9 +18,11 @@ locals {
     { name = "WEBCMS_SITE_URL", value = "https://${var.site-hostname}" },
     { name = "WEBCMS_SITE_HOSTNAME", value = var.site-hostname },
     { name = "WEBCMS_ENV_STATE", value = var.site-env-state },
-    { name = "WEBCMS_ENV_NAME", value = var.site-env-name },
-    { name = "WEBCMS_ENV_LANG", value = var.site-env-lang },
+    { name = "WEBCMS_SITE", value = var.site-env-name },
+    { name = "WEBCMS_LANG", value = var.site-env-lang },
     { name = "WEBCMS_S3_USES_DOMAIN", value = var.site-s3-uses-domain ? "1" : "0" },
+    { name = "WEBCMS_CSRF_ORIGIN_WHITELIST", value = var.site-csrf-origin-whitelist },
+    { name = "WEBCMS_LOG_GROUP", value = var.site-log-group },
 
     # Akamai
     { name = "WEBCMS_AKAMAI_ENABLED", value = var.akamai-enabled ? "1" : "0" },

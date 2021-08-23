@@ -5,6 +5,7 @@
   &::after {
     @include svg-background(external-link--blue-base);
     background-repeat: no-repeat;
+    background-size: 100% 100%;
     content: '';
     display: inline-block;
     height: 0.65em;
@@ -21,7 +22,7 @@
   }
 }
 
-a:not([href=''], [href*='.gov'], [href^='#'], [href^='?'], [href^='/'], [href^='.'], [href^='javascript:'], [href^='mailto:'], [href^='tel:'], [href*='webcms-uploads-dev.s3.amazonaws.com'], [href*='webcms-uploads-stage.s3.amazonaws.com'], [href*='webcms-uploads-prod.s3.amazonaws.com']) {
+a#{$external-urls} {
   @extend .external-link;
 }
 
