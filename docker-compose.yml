@@ -160,8 +160,8 @@ services:
 
 
   blackfire:
-    image: blackfire/blackfire
-    ports: ["8707"]
+    image: blackfire/blackfire:2
+    ports: ["8307"]
     environment:
       # Exposes BLACKFIRE_SERVER_* environment variables from the host
       BLACKFIRE_SERVER_ID: ~
