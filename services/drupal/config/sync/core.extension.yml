@@ -20,6 +20,7 @@ module:
   ckeditor_iframe: 0
   ckeditor_specialchars: 0
   ckeditorheight: 0
+  cloudfront_purger: 0
   components: 0
   config_filter: 0
   config_ignore: 0
@@ -142,6 +143,7 @@ module:
   purge_drush: 0
   purge_processor_cron: 0
   purge_queuer_coretags: 0
+  purge_queuer_url: 0
   purge_ui: 0
   rabbit_hole: 0
   redirect: 0

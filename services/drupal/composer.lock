@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a786e7265e87e984e84dee3f8cba24a2",
+    "content-hash": "0bc67ff1f8e249433e30560440635bd2",
     "packages": [
         {
             "name": "akamai-open/edgegrid-auth",
@@ -3063,6 +3063,69 @@
             "homepage": "https://www.drupal.org/project/ckeditorheight",
             "support": {
                 "source": "https://git.drupalcode.org/project/ckeditorheight"
+            }
+        },
+        {
+            "name": "drupal/cloudfront_purger",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/cloudfront_purger.git",
+                "reference": "8.x-1.2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/cloudfront_purger-8.x-1.2.zip",
+                "reference": "8.x-1.2",
+                "shasum": "cdc31a14fe189c590ecc76149a72b664e7e71c92"
+            },
+            "require": {
+                "aws/aws-sdk-php": "~3.0",
+                "drupal/core": "^8.7.7 || ^9",
+                "drupal/purge": "^3.0@beta",
+                "drupal/purge_queuer_url": "^1.0@RC"
+            },
+            "require-dev": {
+                "drupal/coder": "~8.0",
+                "squizlabs/php_codesniffer": "~2.7"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.2",
+                    "datestamp": "1587084496",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0+"
+            ],
+            "authors": [
+                {
+                    "name": "dpi",
+                    "homepage": "https://www.drupal.org/user/81431"
+                },
+                {
+                    "name": "jibran",
+                    "homepage": "https://www.drupal.org/user/1198144"
+                },
+                {
+                    "name": "kim.pepper",
+                    "homepage": "https://www.drupal.org/user/370574"
+                }
+            ],
+            "description": "Provides a Purger for use with AWS CloudFront",
+            "homepage": "https://www.drupal.org/project/cloudfront_purger",
+            "keywords": [
+                "Drupal"
+            ],
+            "support": {
+                "source": "http://github.com/previousnext/cloudfront_purger",
+                "issues": "http://drupal.org/project/issues/cloudfront_purger"
             }
         },
         {
@@ -7417,6 +7480,60 @@
             "homepage": "https://www.drupal.org/project/purge",
             "support": {
                 "source": "https://git.drupalcode.org/project/purge"
+            }
+        },
+        {
+            "name": "drupal/purge_queuer_url",
+            "version": "1.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://git.drupalcode.org/project/purge_queuer_url.git",
+                "reference": "8.x-1.0"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://ftp.drupal.org/files/projects/purge_queuer_url-8.x-1.0.zip",
+                "reference": "8.x-1.0",
+                "shasum": "f0008bf6477f4ed119a709d114673396e16e7336"
+            },
+            "require": {
+                "drupal/core": "^8.8.6 || ^9",
+                "drupal/purge": "^3.0.0",
+                "php": ">=7.2"
+            },
+            "type": "drupal-module",
+            "extra": {
+                "drupal": {
+                    "version": "8.x-1.0",
+                    "datestamp": "1590746554",
+                    "security-coverage": {
+                        "status": "covered",
+                        "message": "Covered by Drupal's security advisory policy"
+                    }
+                },
+                "branch-alias": {
+                    "dev-8.x-1.x": "1.x-dev"
+                },
+                "drush": {
+                    "services": {
+                        "drush.services.yml": "^10"
+                    }
+                }
+            },
+            "notification-url": "https://packages.drupal.org/8/downloads",
+            "license": [
+                "GPL-2.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Niels van Mourik",
+                    "homepage": "http://www.nielsvm.org"
+                }
+            ],
+            "description": "Queues URLs or paths to your Purge queue utilizing a traffic database.",
+            "homepage": "https://www.drupal.org/project/purge_queuer_url",
+            "support": {
+                "source": "https://git.drupalcode.org/project/purge_queuer_url"
             }
         },
         {
