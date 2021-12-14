@@ -15,3 +15,9 @@ channels:
     id: diagnostics
     grants:
       - 3
+  4:
+    id: purger_cloudfront_8ab22eee9a
+    grants:
+      - 0
+      - 2
+      - 3

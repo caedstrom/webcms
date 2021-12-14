@@ -1,4 +1,8 @@
-purgers: {  }
+purgers:
+  -
+    order_index: 2
+    instance_id: 8ab22eee9a
+    plugin_id: cloudfront
 processors:
   -
     plugin_id: drush_purge_queue_work
@@ -14,4 +18,17 @@ processors:
     status: true
   -
     plugin_id: cron
+    status: true
+queuers:
+  -
+    plugin_id: drush_purge_queue_add
+    status: true
+  -
+    plugin_id: coretags
+    status: true
+  -
+    plugin_id: urlpath
+    status: false
+  -
+    plugin_id: purge_ui_block_queuer
     status: true
